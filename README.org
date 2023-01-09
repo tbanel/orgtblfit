@@ -209,7 +209,7 @@ range of observations. There is no problem as far as the model is
 concerned. However we should be careful, as reality may invalidate our
 predictions with unforeseen events.
 
-/"Prediction is a difficult art, especially when it concerns the future"/
+"Prediction is a difficult art, especially when it concerns the future"
 
   Grucho Max? Mark Twain? Pierre Dac? Niels Bohr?
 
@@ -499,7 +499,6 @@ the ~num~ column by the ~event~ column. ~orgtbl-fit~ gives:
 Let us adjust manually ~$1~ to ~date($1)~:
 
 #+begin_example
-#+end_example
 | event            | num |  Best Fit |   Fit Diff |
 |------------------+-----+-----------+------------|
 | [2023-01-08 Sun] | 1.1 | 1.2354983 |  0.1354983 |
@@ -507,6 +506,7 @@ Let us adjust manually ~$1~ to ~date($1)~:
 | [2023-03-03 Fri] | 3.2 | 3.2435935 |  0.0435935 |
 | [2023-05-17 Wed] | 6.0 | 6.0326146 |  0.0326146 |
 #+TBLFM: $3=0.0371869477971*date($1) - 27462.3666844::$4=$3-$2
+#+end_example
 
 Better.
 
