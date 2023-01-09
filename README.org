@@ -35,8 +35,7 @@ year of the travel, and the number of passengers.
 Can we predict the ~consumption~ using ~year~ and ~passengers~ data? Let us
 try with a simple linear-with-constant model.
 
-To do so, let us put the cursor in the ~consumption~ column and type ~M-x
-orgtbl-fit~
+To do so, let us put the cursor in the ~consumption~ column and type ~M-x orgtbl-fit~
 
 Two additional columns appear:
 - the predicted values by the linear-with-constant model,
@@ -210,7 +209,7 @@ range of observations. There is no problem as far as the model is
 concerned. However we should be careful, as reality may invalidate our
 predictions with unforeseen events.
 
-/"Prediction is a difficult art, especially when it concerns the future"/.
+/"Prediction is a difficult art, especially when it concerns the future"/
 
   Grucho Max? Mark Twain? Pierre Dac? Niels Bohr?
 
@@ -261,9 +260,9 @@ including the basket itself (in grams).
 |      1 |       4 |          59 |         1559 |
 #+end_example
 
-Let us put the cursor on the ~total weight~ column, and type ~M-x
-orgtbl-fit~. The default linear-plus-constant model is the one
-to use. Result is:
+Let us put the cursor on the ~total weight~ column, and type
+~M-x orgtbl-fit~. The default linear-plus-constant model is
+the one to use. Result is:
 
 #+begin_example
 | apples | bananas | blueberries | total weight |  Best Fit | Fit Diff |
@@ -397,9 +396,9 @@ accumulate samples, one per week. Here they are:
 You want to know what are the optimal ~theo~ & ~duration~, with just
 observations over 16 weeks.
 
-You ask for a regression fit with your double quadratic model. You put
-the cursor on the ~quizzresult~ column and you type ~M-x
-orgtbl-fit~. You enter your double quadratic model. And you
+You ask for a regression fit with your double quadratic model.
+You put the cursor on the ~quizzresult~ column and you type
+~M-x orgtbl-fit~. You enter your double quadratic model. And you
 format result to 1 digit after dot with ~;%.1f~ for readability:
 
 #+begin_example
@@ -446,8 +445,8 @@ zero.
 Now solve this simple 2 equations, 2 variables system. Calc can do that.
 - ~M-x calc~ to lauch Calc
 - ~[~ to open a vector
-- ~'~ ~2.049-.136*duration-.7447*theo~  enter the first equation
-- ~'~ ~-269.00*theo+86.62-.7447*duration~ enter the second
+- ' ~2.049-.136*duration-.7447*theo~  enter the first equation
+- ' ~-269.00*theo+86.62-.7447*duration~ enter the second
 - ~]~  close the vector
 - ~a S duration theo~ to solve the system
 
@@ -514,15 +513,11 @@ Better.
 * Installation
 The easiest is to install it from Melpa:
 
-#+begin_example
-M-x customize-variable package-archives
-#+end_example
+: M-x customize-variable package-archives
 
 Add the Melpa URL: http://melpa.org/packages/
 
-#+begin_example
-M-x package-install orgtbl-fit
-#+end_example
+: M-x package-install orgtbl-fit
 
 The package will be auto-loaded when you call ~orgtbl-fit~ (otherwise it
 will stay out of the way).
