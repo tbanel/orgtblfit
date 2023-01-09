@@ -209,7 +209,7 @@ range of observations. There is no problem as far as the model is
 concerned. However we should be careful, as reality may invalidate our
 predictions with unforeseen events.
 
-"Prediction is a difficult art, especially when it concerns the future"
+"/Prediction is a difficult art, especially when it concerns the future/"
 
   Grucho Max? Mark Twain? Pierre Dac? Niels Bohr?
 
@@ -217,15 +217,16 @@ predictions with unforeseen events.
 A classical regression fitting is performed. The process attempts to
 change the placeholders (question marks ~?~) in the model equation by
 actual numerical values. Those numerical values are choosen so that
-they minimize the sum of the square of errors (the so called "least
-squares method"). They also ensure that the sum of errors is zero.
+they minimize the sum of the square of errors (the so called
+"/least squares method/"). They also ensure that the sum of errors
+is zero.
 
 ~orgtbl-fit~ is an interface between Org Tables and Calc. Calc is
 the 30 years old symbolic calculator of Emacs. More specifically, the
 ~calcFunc-fit~ Lisp function is called as the backend. You can call it
 directly in Calc.
 
-Of course, regression with the least squares method is implemented in
+Of course, regression with the /least squares method/ is implemented in
 many systems: R and GnuPlot to name just two. Use ~orgtbl-fit~ if you
 want a pure Emacs system without external dependencies, and
 integration with Org Tables.
