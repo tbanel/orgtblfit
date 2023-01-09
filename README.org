@@ -1,0 +1,542 @@
+# -*- mode: org; coding:utf-8; -*-
+#+TITLE: Do regression fitting on Org Mode tables
+#+OPTIONS: ^:{} authors:Thierry Banel toc:nil
+
+Regression fitting predicts numerical values of a column based on
+other columns. The closer the predicted values to the observed values,
+the better the fit is.
+
+* Example
+
+We have a table of observed data. Buses with passengers consume fuel
+(around 30 liters / 100km) given in the 3rd column. We also have the
+year of the travel, and the number of passengers.
+
+| year | passengers | consumption |
+|------+------------+-------------|
+| 2012 |         33 |        33.2 |
+| 2013 |         31 |        32.8 |
+| 2016 |         26 |        31.8 |
+| 2020 |         28 |        30.5 |
+| 2013 |         47 |        33.1 |
+| 2012 |         24 |        33.1 |
+| 2019 |         23 |        30.8 |
+| 2018 |         41 |        30.9 |
+| 2020 |         29 |        30.5 |
+| 2020 |         21 |        30.4 |
+| 2014 |         27 |        32.4 |
+| 2014 |         16 |        32.3 |
+| 2014 |         24 |        32.4 |
+| 2020 |         31 |        30.5 |
+| 2012 |         19 |        33.0 |
+
+Can we predict the ~consumption~ using ~year~ and ~passengers~ data? Let us
+try with a simple linear-with-constant model.
+
+To do so, let us put the cursor in the ~consumption~ column and type ~M-x
+orgtbl-fit~
+
+Two additional columns appear:
+- the predicted values by the linear-with-constant model,
+- the differences between observations and predictions.
+
+| year | passengers | consumption |  Best Fit |  Fit Diff |
+|------+------------+-------------+-----------+-----------|
+| 2012 |         33 |        33.2 | 33.160273 | -0.039727 |
+| 2013 |         31 |        32.8 | 32.809125 |  9.125e-3 |
+| 2016 |         26 |        31.8 | 31.763664 | -0.036336 |
+| 2020 |         28 |        30.5 | 30.438905 | -0.061095 |
+| 2013 |         47 |        33.1 | 32.936858 | -0.163142 |
+| 2012 |         24 |        33.1 | 33.088423 | -0.011577 |
+| 2019 |         23 |        30.8 | 30.734169 | -0.065831 |
+| 2018 |         41 |        30.9 | 31.213051 |  0.313051 |
+| 2020 |         29 |        30.5 | 30.446888 | -0.053112 |
+| 2020 |         21 |        30.4 | 30.383021 | -0.016979 |
+| 2014 |         27 |        32.4 | 32.442010 |   0.04201 |
+| 2014 |         16 |        32.3 | 32.354193 |  0.054193 |
+| 2014 |         24 |        32.4 | 32.418060 |   0.01806 |
+| 2020 |         31 |        30.5 | 30.462855 | -0.037145 |
+| 2012 |         19 |        33.0 | 33.048506 |  0.048506 |
+#+TBLFM: $4=707.281913694 - 0.335181456447*$1 + 7.98331706947e-3*$2::$5=$4-$3
+
+We see that the predictions are quite close to the observations.
+
+The formula found by ~orgtbl-fit~ is given at the bottom of the table:
+
+#+begin_example
+$4
+= 707.2819
+- 0.3352*$1
++ 0.00798*$2
+#+end_example
+
+Which can be interpreted as:
+- In the year 0, buses used to consume ~707.2819 liters/100km~ (of
+  course this value has no real meaning, as the validity of the model
+  is around 2012-2020)
+- Every year, buses succeed in reducing their consumption by
+  ~0.3352 liters/100km~. Evidence is the negative sign for this
+  coefficient.
+- Each additional passenger generates an overhead of
+  ~0.00798 liters/100km~.
+
+As usual, we should be warry of jumping to conclusions based on data
+only. Coming back to the field and understanding it is mandatory in
+data analysis.
+
+* Usage
+- Put the cursor in the column you want to fit (not necessarily the
+  last one).
+- Type ~M-x orgtbl-fit~.
+- Give a model (the linear-with-constant model is provided as a
+  default).
+- Look at the additional two columns at the end of the table.
+- Look at the formula for the before-last column: it is the given
+  model with placehoders replaced by actual numerical values.
+- Remove the last two columns (~M-S-left~) and play again if you are not
+  satisfied by the results.
+- Add rows to the table with new data to compute predictions.
+
+* Model
+~orgtbl-fit~ needs a model. It is an equation assumed to compute the
+target column. But the parameters are not specified. Instead, question
+marks ~?~ denote placeholders.
+
+A default model is offered. Il is a linear-with-constant model with
+all relevant columns. In the example above, it is:
+: ? +?*year +?*passengers
+
+Only relevant columns appear in the default model. A relevant column
+is an entirely numerical one. Of course, the target column do not
+appear.
+
+If the table has no header, then columns must be refered to by their $
+names. The previous example would be:
+: ? +?*$1 +?*$2
+
+Even though the default model is linear-with-constant, any model can
+be used, be it polynomial, logarithmic, exponential, whatever.
+
+For example, the following model is acceptable:
+: ? +?*log(year-1900) +?*passengers
+Actually it fits quite well the data.
+
+Another model could be:
+: ? +?*year +?*passengers +?*(year-2016)*passengers
+It would be a valid hypothesis if we suspect that there is a cross
+relationship between ~year~ and ~passengers~.
+
+Let us try it:
+
+| year | passengers | consumption |  Best Fit |  Fit Diff |
+|------+------------+-------------+-----------+-----------|
+| 2012 |         33 |        33.2 | 33.211648 |  0.011648 |
+| 2013 |         31 |        32.8 | 32.829305 |  0.029305 |
+| 2016 |         26 |        31.8 | 31.773516 | -0.026484 |
+| 2020 |         28 |        30.5 | 30.434591 | -0.065409 |
+| 2013 |         47 |        33.1 | 33.051511 | -0.048489 |
+| 2012 |         24 |        33.1 | 33.053505 | -0.046495 |
+| 2019 |         23 |        30.8 | 30.811805 |  0.011805 |
+| 2018 |         41 |        30.9 | 31.048010 |   0.14801 |
+| 2020 |         29 |        30.5 | 30.422695 | -0.077305 |
+| 2020 |         21 |        30.4 | 30.517865 |  0.117865 |
+| 2014 |         27 |        32.4 | 32.441287 |  0.041287 |
+| 2014 |         16 |        32.3 | 32.329037 |  0.029037 |
+| 2014 |         24 |        32.4 | 32.410673 |  0.010673 |
+| 2020 |         31 |        30.5 | 30.398903 | -0.101097 |
+| 2012 |         19 |        33.0 | 32.965649 | -0.034351 |
+#+TBLFM: $4=501.454507662 - 0.233013277919*$1 + 2.837561942e-3*$2 - 3.68345292814e-3*$2*($1 - 2016)::$5=$4-$3
+
+The fit is slightly better. After all there might be a cross
+relationship between ~years~ and ~passengers~. The coefficient is
+negative. The interpretation could go something like that: "newer
+buses are designed in a more efficient way, such that additional
+passengers do not increase consumption as it used to".
+
+Or maybe we are over-interpreting data. This new quadratic
+coefficient, ~-0.00368~, is quite small. And consumption data is quite
+coarse: just 3 digits precision.
+
+Returning to the field and understanding it is mandatory.
+
+Note that in the model we have chosen:
+: ? +?*year +?*passengers +?*(year-2016)*passengers
+there is this arbitrary ~2016~ constant. But if we change it to ~2000~ or
+whatever, the results are exactly the same. This is because changes in
+this constant will result in changes in the third question mark ~?~,
+that make the overall equations identical.
+
+Note also that in this new model, we added one question mark ~?~. We
+should be careful not to over-fit. If our model has as many question
+marks ~?~ as rows in the table, the fit will be perfect (zero
+discrepancies between observations and predictions). But our model
+will no longer summarize the data. Use as few coefficients (question
+marks ~?~) as possible to fit data, but not less.
+
+* Forecasting new data
+
+We came up with a quite good predictive model for data
+observations. But could it be applied to new data? Answer is Yes! And
+it is easy: just add new rows to the table.
+
+Example. Coming back to the buses example, we add 3 rows to the table.
+
+| year | passengers | consumption |  Best Fit |  Fit Diff |
+|------+------------+-------------+-----------+-----------|
+| 2012 |         33 |        33.2 | 33.160273 | -0.039727 |
+| 2013 |         31 |        32.8 | 32.809125 |  9.125e-3 |
+|  ...
+| 2020 |         31 |        30.5 | 30.462855 | -0.037145 |
+| 2012 |         19 |        33.0 | 33.048506 |  0.048506 |
+|------+------------+-------------+-----------+-----------|
+| 2017 |         10 |             | 31.300749 | 31.300749 |
+| 2020 |          5 |             | 30.255288 | 30.255288 |
+| 2023 |         31 |             | 29.457310 |  29.45731 |
+#+TBLFM: $4=707.281913694 - 0.335181456447*$1 + 7.98331706947e-3*$2::$5=$4-$3
+
+We ask Org to recompute the table by typing ~C-u C-c *~. And we get our
+3 predictions. Only the ~Best Fit~ column is worth looking at.
+
+Note that one of the rows is for the ~2023~ year, outside the ~2012-2020~
+range of observations. There is no problem as far as the model is
+concerned. However we should be careful, as reality may invalidate our
+predictions with unforeseen events.
+
+"Prediction is a difficult art, especially when it concerns the future".
+  Grucho Max? Mark Twain? Pierre Dac? Niels Bohr?
+
+* How it works?
+A classical regression fitting is performed. The process attempts to
+change the placeholders (question marks ~?~) in the model equation by
+actual numerical values. Those numerical values are choosen so that
+they minimize the sum of the square of errors (the so called "least
+squares method"). They also ensure that the sum of errors is zero.
+
+~orgtbl-fit~ is an interface between Org Tables and Calc. Calc is
+the 30 years old symbolic calculator of Emacs. More specifically, the
+~calcFunc-fit~ Lisp function is called as the backend. You can call it
+directly in Calc.
+
+Of course, regression with the least squares method is implemented in
+many systems: R and GnuPlot to name just two. Use ~orgtbl-fit~ if you
+want a pure Emacs system without external dependencies, and
+integration with Org Tables.
+
+* Fruits baskets
+We need to estimate the average weight of an apple, a banana, and a
+blueberry. But we don't have any device to weight fruits. We can just
+read a label on each basket giving its overall weight. All baskets are
+the same, but each contain a different mix of fruits.
+
+Let us store data in an Org Mode table, one row per observation. Each
+row counts the number of fruits in a basket, plus the overall weight
+including the basket itself (in grams).
+
+| apples | bananas | blueberries | total weight |
+|--------+---------+-------------+--------------|
+|      6 |       5 |          50 |         2816 |
+|      1 |       5 |         232 |         2094 |
+|      1 |       0 |         143 |          952 |
+|      7 |       0 |          57 |         2087 |
+|      0 |       2 |         263 |         1363 |
+|      4 |       2 |         246 |         2193 |
+|      7 |       0 |         184 |         2341 |
+|      5 |       5 |         149 |         2800 |
+|      1 |       3 |         272 |         1784 |
+|      3 |       0 |          32 |         1170 |
+|      0 |       5 |          55 |         1525 |
+|      7 |       5 |         276 |         3486 |
+|      3 |       2 |         227 |         1943 |
+|      7 |       5 |          95 |         3131 |
+|      1 |       4 |          59 |         1559 |
+
+Let us put the cursor on the ~total weight~ column, and type ~M-x
+orgtbl-fit~. The default linear-plus-constant model is the one
+to use. Result is:
+
+| apples | bananas | blueberries | total weight |  Best Fit | Fit Diff |
+|--------+---------+-------------+--------------+-----------+----------|
+|      6 |       5 |          50 |         2816 | 2820.3575 |   4.3575 |
+|      1 |       5 |         232 |         2094 | 2093.7857 |  -0.2143 |
+|      1 |       0 |         143 |          952 | 953.71066 |  1.71066 |
+|      7 |       0 |          57 |         2087 | 2088.1406 |   1.1406 |
+|      0 |       2 |         263 |         1363 | 1359.6083 |  -3.3917 |
+|      4 |       2 |         246 |         2193 | 2195.8743 |   2.8743 |
+|      7 |       0 |         184 |         2341 | 2339.9764 |  -1.0236 |
+|      5 |       5 |         149 |         2800 | 2799.1764 |  -0.8236 |
+|      1 |       3 |         272 |         1784 | 1787.6674 |   3.6674 |
+|      3 |       0 |          32 |         1170 | 1168.5904 |  -1.4096 |
+|      0 |       5 |          55 |         1525 | 1525.3079 |   0.3079 |
+|      7 |       5 |         276 |         3486 | 3486.0003 |     3e-4 |
+|      3 |       2 |         227 |         1943 | 1940.7040 |   -2.296 |
+|      7 |       5 |          95 |         3131 | 3127.0847 |  -3.9153 |
+|      1 |       4 |          59 |         1559 | 1558.0155 |  -0.9845 |
+#+TBLFM: $5=452.653490802 + 217.494062646*$1 + 192.718341278*$2 + 1.9829588217*$3::$6=$5-$4
+
+Let us enhance readability by limiting display to 1 digit after
+dot. The regular Org table ~%.1f~ format is handy:
+
+| apples | bananas | blueberries | total weight | Best Fit | Fit Diff |
+|--------+---------+-------------+--------------+----------+----------|
+|      6 |       5 |          50 |         2816 |   2820.4 |      4.4 |
+|      1 |       5 |         232 |         2094 |   2093.8 |     -0.2 |
+|      1 |       0 |         143 |          952 |    953.7 |      1.7 |
+|      7 |       0 |          57 |         2087 |   2088.1 |      1.1 |
+|      0 |       2 |         263 |         1363 |   1359.6 |     -3.4 |
+|      4 |       2 |         246 |         2193 |   2195.9 |      2.9 |
+|      7 |       0 |         184 |         2341 |   2340.0 |     -1.0 |
+|      5 |       5 |         149 |         2800 |   2799.2 |     -0.8 |
+|      1 |       3 |         272 |         1784 |   1787.7 |      3.7 |
+|      3 |       0 |          32 |         1170 |   1168.6 |     -1.4 |
+|      0 |       5 |          55 |         1525 |   1525.3 |      0.3 |
+|      7 |       5 |         276 |         3486 |   3486.0 |      0.0 |
+|      3 |       2 |         227 |         1943 |   1940.7 |     -2.3 |
+|      7 |       5 |          95 |         3131 |   3127.1 |     -3.9 |
+|      1 |       4 |          59 |         1559 |   1558.0 |     -1.0 |
+#+TBLFM: $5=452.653490802 + 217.494062646*$1 + 192.718341278*$2 + 1.9829588217*$3; %.1f::$6=$5-$4; %.1f
+
+We see that the predicted values are quite close to the actual
+ones. Good!
+
+The formula is easy to interprete:
+: total weight
+: = 452.7
+: + 217.5 * $1
+: + 192.7 * $2
+: + 1.98 * $3
+
+- The empty basket weights 452.7 g.
+- An average apple weights 217.5 g.
+- An average banana weights 192.7 g.
+- A single blueberry weigths 1.98 g.
+
+* The best teacher?
+You are a teacher who gives a 3 days course every week. The course is
+always the same, but you give it to new students each time.
+
+At the end of the course, you require your students to complete a
+quizz. Based on the results, you know that an average student retains
+anything between 5% to 65% of the course. Yes, unfortunately, it never
+reaches 100%.
+
+You want to optimize your course. You believe that there are 2 main
+factors:
+
+- ~theo~: the proportion between theoretical and practical content. 100%
+  theory is as bad as 100% practice. The best is somewhere in between,
+  but you don't know where.
+  : theo ∈ [0..1]
+
+- ~duration~: theoretical lectures alternate with practical exercices,
+  at this rate. Periods of 3 minutes are too short, and periods of 3
+  hours are too long. The best duration is in between.
+  : duration ∈ [3..180]
+
+You choose a quadratic model in the variables, to account for bad
+performance at both end of some interval:
+
+#+begin_example
+quizzresult
+= ?
++ ? * theo + ? * theo^2
++ ? * duration + ? * duration^2
+#+end_example
+
+You suspect that those variables are not completly independent, so you
+add a coupling term to your model:
+
+#+begin_example
+quizzresult
+= ?
++ ? * theo + ? * theo^2
++ ? * duration + ? * duration^2
++ ? * theo * duration
+#+end_example
+
+Your model have 6 question marks ~?~ and therefore 6 numerical values to
+find.
+
+Now, you decide to experiment with different settings every week. You
+accumulate samples, one per week. Here they are:
+
+|  theo | duration | quizzresult |
+|-------+----------+-------------|
+| 0.781 |     18.0 |        30.3 |
+| 0.615 |     38.3 |         5.2 |
+| 0.601 |      5.2 |        52.5 |
+| 0.176 |      4.4 |        60.4 |
+| 0.428 |     40.9 |        10.5 |
+| 0.255 |     12.2 |        66.2 |
+| 0.784 |     12.6 |        34.2 |
+| 0.468 |      5.4 |        58.1 |
+| 0.475 |     37.6 |        19.8 |
+| 0.605 |     22.5 |        47.5 |
+| 0.319 |     24.8 |        58.7 |
+| 0.713 |     30.1 |        19.2 |
+| 0.596 |     36.0 |        15.6 |
+| 0.659 |     21.8 |        42.5 |
+| 0.731 |     19.6 |        36.2 |
+| 0.309 |     44.0 |         4.9 |
+
+You want to know what are the optimal ~theo~ & ~duration~, with just
+observations over 16 weeks.
+
+You ask for a regression fit with your double quadratic model. You put
+the cursor on the ~quizzresult~ column and you type ~M-x
+orgtbl-fit~. You enter your double quadratic model. And you
+format result to 1 digit after dot with ~;%.1f~ for readability:
+
+|  theo | duration | quizzresult | Best Fit | Fit Diff |
+|-------+----------+-------------+----------+----------|
+| 0.781 |     18.0 |        30.3 |     31.4 |      1.1 |
+| 0.615 |     38.3 |         5.2 |      5.4 |      0.2 |
+| 0.601 |      5.2 |        52.5 |     51.3 |     -1.2 |
+| 0.176 |      4.4 |        60.4 |     59.5 |     -0.9 |
+| 0.428 |     40.9 |        10.5 |     11.3 |      0.8 |
+| 0.255 |     12.2 |        66.2 |     67.3 |      1.1 |
+| 0.784 |     12.6 |        34.2 |     34.3 |      0.1 |
+| 0.468 |      5.4 |        58.1 |     59.6 |      1.5 |
+| 0.475 |     37.6 |        19.8 |     20.2 |      0.4 |
+| 0.605 |     22.5 |        47.5 |     46.2 |     -1.3 |
+| 0.319 |     24.8 |        58.7 |     58.6 |     -0.1 |
+| 0.713 |     30.1 |        19.2 |     19.1 |     -0.1 |
+| 0.596 |     36.0 |        15.6 |     15.3 |     -0.3 |
+| 0.659 |     21.8 |        42.5 |     41.8 |     -0.7 |
+| 0.731 |     19.6 |        36.2 |     36.3 |      0.1 |
+| 0.309 |     44.0 |         4.9 |      4.3 |     -0.6 |
+#+TBLFM: $4=41.310831661 + 86.6227413961*$1 - 134.496123584*$1^2 + 2.04949509715*$2 - 0.067672358144*$2^2 - 0.744700713305*$2*$1 ;%.1f::$5=$4-$3 ;%.1f
+
+The fit is quite good. Your optimal model instanciation is therefore:
+
+#+begin_example
+quizzresult
+= 41.31
++ 86.62*theo - 134.50*theo^2
++ 2.049*duration - 0.068*duration^2
+- 0.7447*duration*theo
+#+end_example
+
+From there you can find the values of ~theo~ and ~duration~ which maximize
+~quizzresult~. Easy. Just compute partial derivatives, and make them
+zero.
+
+#+begin_example
+0 = 2.049-.136*duration-.7447*theo
+0 = -269.00*theo+86.62-.7447*duration
+#+end_example
+
+Now solve this simple 2 equations, 2 variables system. Calc can do that.
+- ~M-x calc~ to lauch Calc
+- ~[~ to open a vector
+- ~' 2.049-.136*duration-.7447*theo~  enter the first equation
+- ~' -269.00*theo+86.62-.7447*duration~ enter the second
+- ~]~  close the vector
+- ~a S duration theo~ to solve the system
+
+Calc answer:
+#+begin_example
+[duration = 13.5077128691, theo = 0.284612662552]
+#+end_example
+
+The best is to alternate 13 minutes and 30 seconds runs. The best is
+also to do 28.46% theoretical lectures (and 71.54% practical sessions).
+
+You can inject those values into the table. Just put the cursor in
+the last row and the first column. Then type ~Ret~ and fill in the
+cells. Compute this new row typing ~C-c *~:
+
+|  theo | duration | quizzresult | Best Fit | Fit Diff |
+|-------+----------+-------------+----------+----------|
+|   ...
+| 0.309 |     44.0 |         4.9 |      4.3 |     -0.6 |
+| .2846 |     13.5 |             |     67.5 |     67.5 |
+#+TBLFM: $4=41.310831661 + 86.6227413961*$1 - 134.496123584*$1^2 + 2.04949509715*$2 - 0.067672358144*$2^2 - 0.744700713305*$2*$1 ;%.1f::$5=$4-$3 ;%.1f
+
+The best possible result to the quiz is therefore 67.5%.
+
+By the way, you are not the best teacher just by following 2 optimal
+numbers, of course. Teaching is much more than this simplistic
+regression fitting example.
+
+* Dates
+Dates in tables are converted to a number of days since January 1st
+year 1. Therefore columns of dates can be used as numeric columns.
+
+However, the spreadsheet formula added by ~orgtbl-fit~ may need to be
+ajusted manually. The ~date()~ function is handy. It can convert a date
+to a number of days and back again. As an example, we want to explain
+the ~num~ column by the ~event~ column. ~orgtbl-fit~ gives:
+
+| event            | num | Best Fit                                 | Fit Diff                                 |
+|------------------+-----+------------------------------------------+------------------------------------------|
+| [2023-01-08 Sun] | 1.1 | 0.037186948*[2023-01-08 Sun] - 27462.367 | 0.037186948*[2023-01-08 Sun] - 27463.467 |
+| [2023-02-08 Wed] | 2.6 | 0.037186948*[2023-02-08 Wed] - 27462.367 | 0.037186948*[2023-02-08 Wed] - 27464.967 |
+| [2023-03-03 Fri] | 3.2 | 0.037186948*[2023-03-03 Fri] - 27462.367 | 0.037186948*[2023-03-03 Fri] - 27465.567 |
+| [2023-05-17 Wed] | 6.0 | 0.037186948*[2023-05-17 Wed] - 27462.367 | 0.037186948*[2023-05-17 Wed] - 27468.367 |
+#+TBLFM: $3=0.0371869477971*$1 - 27462.3666844::$4=$3-$2
+
+Let us adjust manually ~$1~ to ~date($1)~:
+
+| event            | num |  Best Fit |   Fit Diff |
+|------------------+-----+-----------+------------|
+| [2023-01-08 Sun] | 1.1 | 1.2354983 |  0.1354983 |
+| [2023-02-08 Wed] | 2.6 | 2.3882937 | -0.2117063 |
+| [2023-03-03 Fri] | 3.2 | 3.2435935 |  0.0435935 |
+| [2023-05-17 Wed] | 6.0 | 6.0326146 |  0.0326146 |
+#+TBLFM: $3=0.0371869477971*date($1) - 27462.3666844::$4=$3-$2
+
+Better.
+
+* Installation
+The easiest is to install it from Melpa:
+
+#+begin_example
+M-x customize-variable package-archives
+#+end_example
+
+Add the Melpa URL: http://melpa.org/packages/
+
+#+begin_example
+M-x package-install orgtbl-fit
+#+end_example
+
+The package will be auto-loaded when you call ~orgtbl-fit~ (otherwise it
+will stay out of the way).
+
+You may want to add an entry in the ~Table~ menu, ~Column~ sub-menu. You
+may also want to call ~orgtbl-fit~ with ~C-c f~. One way to do so is to
+use ~use-package~ in your ~.emacs~ init file:
+
+#+begin_src elisp
+(use-package orgtbl-fit
+  :after (org)
+  :bind ("C-c f" . orgtbl-fit)
+  :config
+  (easy-menu-add-item
+   org-tbl-menu '("Column")
+   ["Regression fit this column" orgtbl-fit (org-at-table-p)]))
+#+end_src
+
+* Authors, contributors
+
+Author
+- Thierry Banel, tbanelwebmin at free dot fr
+
+Look also at ~orgtbl-aggregate~ and ~orgtbl-join~ packages from the same
+author for other Org table tools.
+
+* License
+Copyright (C) 2014-2023  Thierry Banel
+
+orgtbl-aggregate is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+orgtbl-aggregate is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.

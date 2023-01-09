@@ -1,0 +1,707 @@
+* GPL-3 Licence
+#+TITLE: Unit Tests & Examples for Orgtbl Fit
+
+orgtbl-fit is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+orgtbl-fit is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+* Recipe to run unit tests
+To run unit tests:
+- Open the ~unittests.org~ file in Emacs.
+- Execute the following Lisp block by typing ~C-c C-c~ in it.
+- Then compare the modified file with the reference ~unittests-ref.org~,
+  for example with ~M-x compare-windows~.
+  There should be no difference.
+
+#+begin_src elisp :results none
+(let (model c)
+  (while
+      (and
+       (search-forward-regexp
+	(rx bol "model" (* space) "=" (* space) (group (+ nonl)))
+	(point-max)
+	t)
+       (setq model (match-string 1))
+       (search-forward "-(v)" (point-max) t))
+    (setq c (current-column))
+    (forward-line 1)
+    (move-to-column (- c 2))
+    (orgtbl-fit model)))
+#+end_src
+
+* Straightforward example
+
+model = ? +?*$1
+------(v)
+| 1 | 13 |
+| 2 | 23 |
+| 3 | 33 |
+| 4 | 43 |
+| 5 | 53 |
+
+* Simple example
+
+model = ? +?*x +?*y +?*z
+--------------(v)
+| x | y | z | cost |
+|---+---+---+------|
+| 1 | 5 | 1 |   12 |
+| 2 | 2 | 5 |   15 |
+| 3 | 9 | 9 |   21 |
+| 4 | 1 | 5 |   30 |
+| 5 | 8 | 0 |   45 |
+
+* Same table, but fit a different target column
+
+model = ? +?*x +?*z +?*cost
+-----(v)
+| x | y | z | cost |
+|---+---+---+------|
+| 1 | 5 | 1 |   12 |
+| 2 | 2 | 5 |   15 |
+| 3 | 9 | 9 |   21 |
+| 4 | 1 | 5 |   30 |
+| 5 | 8 | 0 |   45 |
+
+* Luxurious header
+
+model = ? +?*yme +?*sogd
+----------------------(v)
+|-------+---------+---------|
+|-------+---------+---------|
+| yèm:e | so gôöd | Fùb-t:ŭ |
+|   oFf |   --ĥ-- |    (45) |
+|-------+---------+---------|
+|     5 |     5.6 |    19.3 |
+|     9 |     7.1 |    38.1 |
+|     3 |     1.0 |    14.4 |
+|    22 |     7.4 |   102.1 |
+|     1 |     9.9 |    -5.1 |
+|-------+---------+---------|
+
+* Example of portable PCs
+Here are some PC with their public prices and technical features
+
+| Brand | Screen | CPU   | OS | Mem Gb | Price |
+|-------+--------+-------+----+--------+-------|
+| AAA   | 17.3"  | i7 HQ | W  |      4 |   699 |
+| BBB   | 17.3"  | i7 HQ | W  |      6 |   749 |
+| CCC   | 17.3"  | i5 H  | F  |      4 |   669 |
+| DDD   | 17.3"  | i5 U  | W  |      6 |   645 |
+| EEE   | 17.3"  | i5 M  | W  |      4 |   669 |
+| GGG   | 15.6"  | i7 U  | W  |      8 |   729 |
+| HHH   | 15.6"  | i7 U  | W  |      8 |   679 |
+| III   | 15.6"  | i7 U  | W  |      8 |   799 |
+| JJJ   | 15.6"  | i7 HQ | F  |      4 |   699 |
+| KKK   | 15.6"  | i5 U  | W  |     16 |   699 |
+
+Can we predict the price depending on components ?
+We put this table in a numerical form as this:
+
+model = ? +?*S173 +?*i7 +?*OS +?*Mem
+----------------------------------(v)
+| Brand | S173 | i7 | OS | Mem | Price |
+|-------+------+----+----+-----+-------|
+| AAA   |    1 |  1 |  1 |   4 |   699 |
+| BBB   |    1 |  1 |  1 |   6 |   749 |
+| CCC   |    1 |  0 |  0 |   4 |   669 |
+| DDD   |    1 |  0 |  1 |   6 |   645 |
+| EEE   |    1 |  0 |  1 |   4 |   669 |
+| GGG   |    0 |  1 |  1 |   8 |   729 |
+| HHH   |    0 |  1 |  1 |   8 |   679 |
+| III   |    0 |  1 |  1 |   8 |   799 |
+| JJJ   |    0 |  1 |  0 |   4 |   699 |
+| KKK   |    0 |  0 |  1 |  16 |   699 |
+
+The fit is not perfect. Maybe the graphical card should be taken into account.
+We see that
+- the base price is 625€
+- a 17" screen costs 12€ more than a 15" one
+- i7 costs an additional 66€ over i5
+- W OS or F OS has almost no impact
+- 1 additional Gb of memory costs 5€
+
+* Table with header
+
+model = ? +?*a +?*b +?*c
+---------------(v)
+| a | b |  c | r s  |
+|---+---+----+------|
+| 1 | 5 | 10 | 57.7 |
+| 2 | 2 | 12 | 30.1 |
+| 3 | 9 | 12 | 99.9 |
+| 4 | 1 | 17 | 21.3 |
+| 5 | 8 | 17 | 91.6 |
+
+* Normalize column names and mix them with dollar forms
+
+model = ? +?*$1 +?*bb +?*dari
+-------------------------(v)
+| a_a | b & b | daŭri |  r s |
+|-----+-------+-------+------|
+|   1 |     5 |    10 | 57.7 |
+|   2 |     2 |    12 | 30.1 |
+|   3 |     9 |    12 | 99.9 |
+|   4 |     1 |    17 | 21.3 |
+|   5 |     8 |    17 | 91.6 |
+
+* Non linear model
+it depends on a*b
+
+model = ? +?*a + ?*b + ?*a*b +?*c
+----------------(v)
+| a | b |  c | observ |
+|---+---+----+--------|
+| 0 | 1 | 87 |   99.4 |
+| 1 | 9 |  8 |  101.8 |
+| 2 | 2 | 28 |   67.5 |
+| 3 | 2 | 87 |  130.6 |
+| 4 | 2 | 10 |   60.2 |
+| 5 | 6 | 64 |  159.5 |
+| 6 | 7 | 61 |  173.9 |
+| 7 | 2 | 69 |  145.2 |
+
+* Table with active header
+
+model = ? +?*a1 +?*b2 +?*c3
+-------------------------(v)
+| ! | a 1 | b 2 | c 3 | observ |
+|---+-----+-----+-----+--------|
+| # |   0 |   1 |  87 | 105.34 |
+| # |   1 |   9 |   8 | 105.58 |
+| # |   2 |   2 |  28 |  69.75 |
+| # |   3 |   2 |  87 | 135.46 |
+| # |   4 |   2 |  10 |  65.42 |
+| # |   5 |   6 |  64 | 162.65 |
+| # |   6 |   7 |  61 | 175.79 |
+| # |   7 |   2 |  69 | 145.92 |
+
+model = ? +?*b2 +?*c3 +?*observ
+------(v)
+| ! | a 1 | b 2 | c 3 | observ |
+|---+-----+-----+-----+--------|
+| # |   0 |   1 |  87 | 105.34 |
+| # |   1 |   9 |   8 | 105.58 |
+| # |   2 |   2 |  28 |  69.75 |
+| # |   3 |   2 |  87 | 135.46 |
+| # |   4 |   2 |  10 |  65.42 |
+| # |   5 |   6 |  64 | 162.65 |
+| # |   6 |   7 |  61 | 175.79 |
+| # |   7 |   2 |  69 | 145.92 |
+
+* More variables than observations
+The fit is perfect
+
+model = ? +?*a +?*b +?*c +?*a*b +?*a*c +?*b*c +?*a*a +?*b*b +?*c*c
+--------------------(v)
+| ! | a | b |  c | observ |
+|---+---+---+----+--------|
+| # | 0 | 1 | 87 |   99.4 |
+| # | 1 | 9 |  8 |  101.8 |
+| # | 2 | 2 | 28 |   67.5 |
+| # | 3 | 2 | 87 |  130.6 |
+| # | 4 | 2 | 10 |   60.2 |
+| # | 5 | 6 | 64 |  159.5 |
+| # | 6 | 7 | 61 |  173.9 |
+| # | 7 | 2 | 69 |  145.2 |
+
+* Bigger table
+
+model = ? +?*a +?*b +?*c +?*a*a +?*b*b +?*c*c +?*a*b +?*a*c +?*b*c
+--------------------(v)
+| ! |  a | b |  c |    obs |
+|---+----+---+----+--------|
+| # |  6 | 1 | 16 |  30.25 |
+| # | 14 | 5 | 13 |  42.25 |
+| # | 14 | 4 |  9 |  56.25 |
+| # |  9 | 5 | 10 |  61.50 |
+| # |  0 | 1 | 15 |  66.75 |
+| # |  5 | 3 | 13 |  50.25 |
+| # |  2 | 5 | 16 |  63.25 |
+| # |  9 | 3 |  7 |  58.50 |
+| # |  8 | 2 | 12 |  37.25 |
+| # |  7 | 5 |  9 |  64.25 |
+| # |  8 | 4 |  0 |  86.00 |
+| # |  6 | 0 |  2 |  52.00 |
+| # | 10 | 2 |  7 |  50.00 |
+| # |  0 | 4 | 19 |  73.00 |
+| # |  5 | 3 | 12 |  52.00 |
+| # |  6 | 4 |  0 |  78.00 |
+| # |  6 | 5 | 19 |  44.50 |
+| # | 14 | 5 |  9 |  66.25 |
+| # |  6 | 7 | 19 |  51.00 |
+| # | 14 | 1 | 19 | -37.75 |
+| # |  8 | 1 | 17 |  14.25 |
+| # |  6 | 1 | 10 |  42.50 |
+| # |  6 | 7 |  2 |  85.40 |
+| # | 14 | 6 |  5 | 100.00 |
+| # |  2 | 0 |  7 |  52.00 |
+| # | 11 | 6 | 10 |  68.50 |
+| # | 13 | 3 | 16 |   8.00 |
+| # | 10 | 7 |  2 | 106.25 |
+| # | 10 | 4 | 15 |  34.00 |
+| # |  4 | 0 |  1 |  53.00 |
+| # | 13 | 0 | 12 |  -3.00 |
+| # |  0 | 2 |  7 |  60.00 |
+| # |  8 | 4 |  7 |  65.00 |
+| # |  3 | 2 | 17 |  52.00 |
+| # | 10 | 1 |  1 |  65.00 |
+| # | 14 | 2 | 11 |  22.25 |
+| # |  9 | 5 | 18 |  33.50 |
+| # |  7 | 5 | 13 |  54.50 |
+| # | 11 | 3 | 13 |  31.00 |
+| # |  1 | 4 | 16 |  66.00 |
+| # |  5 | 2 | 17 |  40.00 |
+| # |  8 | 4 |  9 |  59.00 |
+| # |  6 | 3 |  7 |  59.25 |
+| # | 14 | 6 |  7 |  88.00 |
+| # |  3 | 2 | 17 |  52.00 |
+
+* Apples & bananas
+
+We need to estimate the average weight of apples, bananas, and
+strawberries.  But we only have weights for some packages containing a
+mix of such fruits.
+
+The weight of a package is the weight of apples, bananas, and
+strawberries composing the package, plus the packaging itself.  The
+packagings are all the same.
+
+Let us store data in an Org Mode table, one row per observation.  Each
+row counts the number of fruits in a pack, plus the weight of the pack
+(in grams).
+
+model = ? +?*apples +?*bananas +?*strawberries
+---------------------------------------(v)
+| apples | bananas | strawberries | total weight |
+|--------+---------+--------------+--------------|
+|      8 |       4 |           48 |         2928 |
+|     11 |       8 |           21 |         3561 |
+|      9 |       6 |           32 |         3140 |
+|      8 |       3 |           47 |         2737 |
+|     10 |       1 |           27 |         2349 |
+|     10 |       0 |           11 |         1927 |
+|      7 |       6 |           10 |         2581 |
+|      5 |       1 |           11 |         1499 |
+|      1 |       8 |           13 |         2245 |
+|      9 |       5 |           42 |         3128 |
+|      7 |       6 |           26 |         2818 |
+|      1 |       2 |           40 |         1630 |
+|      9 |       6 |           33 |         3160 |
+|      5 |       8 |           32 |         3009 |
+|      3 |       0 |           18 |         1191 |
+
+The fit is quite good. It should be interpreted as:
+- weight of the packaging  = 566.276919769 grams
+- weight of one apple      = 119.776891962 grams
+- weight of one banana     = 170.361128214 grams
+- weight of one strawberry =  15.009036802 grams
+
+* Example: revenue of a shop
+
+A shop gets changing revenues.  Less sells are performed when weather
+is rainy.  More sells are performed on Saturdays.  To be sure,
+observations are recorded over a few days.  Here they are, one row per
+day:
+
+model = ? +?*Saturday +?*Rainy +?*Sunny +?*Winter
+----------------------------------------(v)
+| Saturday | Rainy | Sunny | Winter | Revenue |
+|----------+-------+-------+--------+---------|
+|        1 |     1 |     0 |      0 |   19674 |
+|        0 |     1 |     0 |      0 |   13972 |
+|        0 |     1 |     0 |      0 |   13845 |
+|        0 |     0 |     0 |      0 |   15997 |
+|        0 |     0 |     1 |      0 |   15253 |
+|        0 |     0 |     1 |      0 |   15466 |
+|        1 |     0 |     0 |      0 |   22128 |
+|        0 |     0 |     0 |      0 |   16092 |
+|        0 |     0 |     0 |      0 |   15764 |
+|        0 |     1 |     0 |      0 |   14116 |
+|        0 |     1 |     0 |      0 |   13817 |
+|        0 |     0 |     0 |      0 |   15754 |
+|        1 |     0 |     1 |      1 |   20593 |
+|        0 |     0 |     1 |      1 |   14592 |
+|        0 |     0 |     1 |      1 |   14791 |
+|        0 |     0 |     0 |      1 |   15653 |
+|        0 |     1 |     0 |      1 |   13473 |
+|        0 |     0 |     0 |      1 |   15508 |
+
+Note that a day may be neither rainy nor sunny.  Observations are not
+very precise: for instance, a day may be rainy only in the morning,
+but it is recorded as "1".  Winter season is also quite coarse, as it
+is either 1 or 0, nothing in between.
+
+Not bad: revenue is predicted within 1% error.
+
+The formula is interesting.  Let us look at it in detail:
+
+$6=
+  15996.7226519
+  + 5908.30497238 $1
+  - 2082.82651934 $2
+  - 742.574585636 $3
+  - 494.681767955 $4
+
+We get what we were looking for: the influence of each factor on the
+revenue.  We have:
+- a base revenue of 15997
+- an additional 5908 revenue on Saturdays
+- a big negative impact of rain: 2083 lost in revenue
+- sunny days lessen revenue by 743 too
+- in winter 495 is lost every day.
+
+The surprise comes from the bad impact of rain *and* sun.  Actually,
+people are more eager to shop on cloudy days.
+
+Even though the fit is not perfect, it gives figures which can help
+steering the activity.  More sales persons are required on Saturday,
+and less on rainy days, and we know approximately how many:
+- 5908 / 15997 = 37% more on Saturdays
+- 2083 / 15997 = 13% less on rainy days
+- etc.
+
+This kind of analysis can be further enhanced.  More observations will
+smooth statistical errors.  More criterias will better explain the
+revenue.  For instance, adding a column about movies blockbusters may
+give better fit with less differences (people go to movies theaters
+instead of shopping).
+
+* Big table
+
+model = ? +?*a +?*b +?*c +?*d +?*e
+----------------------------(v)
+|  a |   b | c |  d |  e |       r |
+|----+-----+---+----+----+---------|
+| 81 | 190 | 7 | 26 | 56 |  801.74 |
+| 35 | 176 | 4 | 33 | 79 |  663.89 |
+| 36 | 155 | 3 | 35 | 96 |  630.88 |
+| 61 | 122 | 5 | 39 | 76 |  535.66 |
+| 98 | 116 | 0 | 29 | 98 |  622.40 |
+| 18 | 112 | 6 | 40 | 88 |  466.55 |
+| 53 | 111 | 8 | 45 | 54 |  441.94 |
+| 65 | 142 | 5 | 29 | 84 |  667.40 |
+| 91 | 138 | 1 |  4 | 84 |  747.65 |
+| 30 | 164 | 7 | 25 | 55 |  622.18 |
+| 36 | 140 | 3 | 12 | 60 |  569.47 |
+| 29 | 177 | 1 | 22 | 98 |  710.81 |
+| 80 | 139 | 4 | 20 | 74 |  679.90 |
+|  2 | 116 | 8 | 26 | 97 |  559.10 |
+| 93 | 113 | 6 |  1 | 76 |  739.69 |
+| 82 | 181 | 3 | 40 | 96 |  780.96 |
+| 24 | 134 | 9 | 31 | 52 |  517.97 |
+| 58 | 198 | 1 | 14 | 51 |  722.89 |
+| 58 | 137 | 6 | 29 | 53 |  560.23 |
+| 87 | 140 | 7 | 37 | 93 |  730.81 |
+| 84 | 189 | 2 | 19 | 66 |  787.10 |
+| 70 | 157 | 0 | 16 | 70 |  657.89 |
+|  1 | 132 | 3 |  5 | 97 |  614.22 |
+| 23 | 153 | 7 |  3 | 80 |  738.34 |
+|  1 | 178 | 0 | 49 | 71 |  453.55 |
+| 14 | 109 | 1 | 26 | 93 |  445.47 |
+| 73 | 108 | 3 | 45 | 99 |  532.04 |
+| 78 | 141 | 9 | 21 | 85 |  785.42 |
+| 82 | 158 | 4 |  0 | 98 |  892.32 |
+| 14 | 169 | 8 | 21 | 58 |  645.62 |
+| 91 | 144 | 7 | 31 | 63 |  684.19 |
+| 44 | 126 | 2 | 33 | 64 |  456.51 |
+| 83 | 154 | 1 | 42 | 73 |  594.24 |
+| 51 | 198 | 5 | 18 | 67 |  800.84 |
+| 59 | 137 | 6 | 21 | 96 |  723.37 |
+| 28 | 154 | 2 | 33 | 89 |  583.31 |
+| 31 | 160 | 4 | 19 | 74 |  648.68 |
+| 88 | 194 | 3 | 21 | 54 |  781.84 |
+| 55 | 133 | 5 | 30 | 54 |  526.93 |
+| 91 | 156 | 0 | 21 | 87 |  727.37 |
+| 78 | 173 | 4 | 44 | 93 |  738.84 |
+| 25 | 134 | 1 | 17 | 59 |  476.54 |
+| 12 | 144 | 6 | 28 | 74 |  556.71 |
+| 86 | 145 | 7 | 11 | 93 |  847.70 |
+| 47 | 178 | 9 | 48 | 88 |  735.27 |
+| 67 | 175 | 5 | 33 | 51 |  655.96 |
+| 59 | 166 | 2 | 13 | 99 |  791.40 |
+| 79 | 184 | 9 | 44 | 99 |  866.72 |
+| 26 | 197 | 0 | 31 | 62 |  605.13 |
+| 34 | 178 | 7 | 29 | 54 |  653.41 |
+| 45 | 189 | 7 | 18 | 95 |  875.28 |
+| 79 | 108 | 0 | 44 | 91 |  479.83 |
+| 24 | 105 | 4 | 42 | 74 |  377.02 |
+| 98 | 195 | 2 | 23 | 64 |  811.20 |
+|  7 | 107 | 5 |  6 | 61 |  469.02 |
+| 57 | 107 | 1 | 37 | 98 |  496.73 |
+| 63 | 157 | 1 | 11 | 63 |  657.35 |
+| 99 | 104 | 0 |  9 | 89 |  641.89 |
+| 87 | 121 | 5 | 27 | 91 |  677.15 |
+| 37 | 133 | 6 | 14 | 87 |  668.84 |
+| 39 | 100 | 1 | 28 | 60 |  361.05 |
+| 35 | 138 | 0 | 34 | 66 |  446.21 |
+| 86 | 143 | 1 | 25 | 98 |  710.12 |
+|  2 | 187 | 4 | 30 | 54 |  567.46 |
+|  4 | 171 | 4 | 33 | 84 |  601.88 |
+| 74 | 157 | 7 | 15 | 72 |  780.18 |
+| 12 | 130 | 4 |  5 | 84 |  606.53 |
+| 77 | 101 | 2 |  0 | 57 |  558.91 |
+| 20 | 172 | 2 |  1 | 64 |  674.80 |
+| 15 | 157 | 1 | 28 | 58 |  478.68 |
+| 93 | 100 | 7 |  8 | 62 |  645.89 |
+| 89 | 158 | 4 | 20 | 59 |  709.54 |
+| 86 | 168 | 5 | 32 | 93 |  802.30 |
+| 83 | 107 | 2 |  8 | 95 |  670.15 |
+| 23 | 151 | 3 | 19 | 77 |  599.82 |
+| 39 | 167 | 5 |  6 | 84 |  782.22 |
+| 36 | 157 | 0 | 24 | 93 |  626.17 |
+|  4 | 126 | 3 | 43 | 79 |  396.38 |
+|  2 | 104 | 5 |  3 | 75 |  504.82 |
+| 41 | 190 | 9 | 36 | 51 |  696.39 |
+| 85 | 137 | 3 | 41 | 88 |  626.72 |
+| 19 | 133 | 7 | 39 | 87 |  547.62 |
+| 66 | 112 | 1 |  4 | 96 |  655.23 |
+| 16 | 138 | 9 |  2 | 76 |  701.97 |
+| 57 | 130 | 2 | 24 | 50 |  488.31 |
+| 67 | 165 | 0 | 21 | 97 |  736.80 |
+| 86 | 183 | 5 | 13 | 72 |  860.06 |
+| 40 | 160 | 1 | 41 | 76 |  539.23 |
+| 91 | 189 | 9 | 39 | 89 |  895.86 |
+| 43 | 175 | 5 | 49 | 50 |  540.38 |
+| 82 | 149 | 5 | 28 | 87 |  735.79 |
+| 98 | 115 | 5 | 47 | 81 |  571.40 |
+| 32 | 170 | 9 | 31 | 50 |  635.15 |
+| 13 | 187 | 5 | 42 | 79 |  631.31 |
+| 10 | 167 | 0 |  9 | 76 |  613.06 |
+| 82 | 169 | 9 | 43 | 67 |  735.47 |
+| 81 | 103 | 7 | 46 | 86 |  550.96 |
+| 28 | 105 | 5 | 36 | 87 |  463.33 |
+| 29 | 156 | 9 | 27 | 96 |  741.47 |
+| 77 | 192 | 5 | 20 | 70 |  835.89 |
+| 46 | 102 | 1 | 49 | 66 |  315.69 |
+|  0 | 141 | 0 | 41 | 62 |  345.78 |
+| 57 | 174 | 5 |  8 | 90 |  849.60 |
+| 38 | 158 | 7 | 34 | 87 |  680.41 |
+| 66 | 104 | 6 |  8 | 89 |  669.88 |
+| 71 | 145 | 6 | 13 | 92 |  791.81 |
+| 12 | 100 | 0 | 38 | 65 |  267.83 |
+| 32 | 139 | 8 | 44 | 98 |  619.54 |
+| 15 | 145 | 5 | 13 | 77 |  619.95 |
+| 13 | 195 | 9 | 35 | 58 |  680.60 |
+| 62 | 134 | 4 |  3 | 57 |  645.01 |
+| 19 | 127 | 4 | 25 | 81 |  522.98 |
+| 79 | 105 | 4 | 42 | 67 |  466.96 |
+| 27 | 112 | 5 | 19 | 58 |  463.01 |
+| 60 | 176 | 8 | 24 | 72 |  788.05 |
+| 28 | 119 | 2 | 13 | 70 |  501.28 |
+| 84 | 168 | 5 | 18 | 96 |  863.40 |
+| 22 | 161 | 8 | 28 | 97 |  726.53 |
+| 95 | 162 | 8 | 29 | 67 |  781.50 |
+| 38 | 154 | 1 | 25 | 87 |  614.13 |
+|  8 | 134 | 3 | 46 | 98 |  473.62 |
+| 41 | 141 | 3 | 28 | 66 |  536.71 |
+| 25 | 130 | 9 | 44 | 87 |  560.89 |
+| 15 | 193 | 6 | 24 | 64 |  695.58 |
+| 68 | 184 | 2 | 39 | 73 |  681.77 |
+| 25 | 158 | 3 |  1 | 83 |  714.29 |
+| 82 | 116 | 3 | 26 | 93 |  632.81 |
+| 70 | 132 | 1 | 24 | 88 |  619.85 |
+| 27 | 173 | 9 |  7 | 59 |  757.11 |
+| 40 | 198 | 4 | 23 | 56 |  710.91 |
+|  6 | 128 | 6 | 28 | 51 |  427.63 |
+| 54 | 137 | 3 |  4 | 77 |  679.98 |
+| 39 | 107 | 5 |  1 | 53 |  529.65 |
+| 54 | 134 | 0 | 26 | 91 |  579.71 |
+| 46 | 149 | 8 |  7 | 95 |  816.26 |
+| 97 | 189 | 8 |  2 | 76 | 1001.99 |
+| 76 | 193 | 0 | 36 | 95 |  772.67 |
+| 31 | 132 | 5 | 14 | 69 |  584.67 |
+| 83 | 176 | 1 | 49 | 55 |  578.82 |
+| 90 | 147 | 9 | 33 | 90 |  794.81 |
+| 44 | 109 | 6 | 13 | 97 |  644.09 |
+| 25 | 150 | 1 | 38 | 58 |  437.74 |
+| 37 | 170 | 8 |  9 | 86 |  826.80 |
+| 88 | 166 | 4 | 34 | 99 |  795.72 |
+| 50 | 175 | 6 | 14 | 83 |  808.52 |
+| 36 | 143 | 5 | 32 | 71 |  561.17 |
+| 89 | 141 | 0 | 26 | 59 |  574.34 |
+| 71 | 136 | 7 | 42 | 57 |  558.65 |
+| 92 | 167 | 0 | 28 | 55 |  638.60 |
+| 42 | 142 | 1 | 15 | 54 |  527.35 |
+| 97 | 146 | 3 | 27 | 70 |  679.77 |
+| 14 | 187 | 7 |  9 | 69 |  765.45 |
+|  8 | 181 | 0 | 35 | 57 |  490.33 |
+| 24 | 175 | 0 | 32 | 56 |  513.23 |
+| 31 | 197 | 5 | 30 | 77 |  739.49 |
+|  4 | 159 | 7 | 40 | 83 |  579.35 |
+| 75 | 139 | 1 | 44 | 95 |  591.59 |
+| 91 | 172 | 8 | 36 | 54 |  736.82 |
+| 28 | 146 | 3 | 31 | 55 |  480.70 |
+| 54 | 196 | 2 | 34 | 98 |  784.02 |
+| 77 | 106 | 6 |  0 | 53 |  621.58 |
+| 19 | 130 | 7 |  8 | 90 |  671.25 |
+| 50 | 162 | 7 | 48 | 79 |  636.59 |
+| 39 | 108 | 1 | 10 | 85 |  532.65 |
+| 14 | 158 | 1 | 45 | 63 |  426.60 |
+| 38 | 105 | 6 | 13 | 98 |  623.14 |
+| 22 | 119 | 1 |  7 | 58 |  462.70 |
+| 50 | 144 | 3 | 11 | 97 |  724.68 |
+|  3 | 121 | 4 | 40 | 73 |  388.13 |
+| 82 | 102 | 9 | 24 | 92 |  685.51 |
+| 88 | 106 | 7 | 30 | 89 |  646.85 |
+| 92 | 171 | 9 | 21 | 63 |  837.36 |
+| 19 | 187 | 6 | 37 | 60 |  621.43 |
+| 31 | 135 | 3 | 38 | 95 |  545.12 |
+| 99 | 107 | 6 | 23 | 80 |  657.19 |
+| 56 | 189 | 7 | 36 | 51 |  693.20 |
+| 21 | 168 | 5 | 33 | 97 |  680.92 |
+| 13 | 115 | 2 | 25 | 70 |  411.32 |
+| 75 | 160 | 9 | 12 | 66 |  815.91 |
+| 63 | 138 | 7 | 26 | 51 |  594.67 |
+| 43 | 136 | 8 |  8 | 87 |  743.46 |
+| 77 | 151 | 4 |  7 | 69 |  746.74 |
+| 88 | 186 | 7 | 11 | 84 |  947.75 |
+|  0 | 114 | 8 | 48 | 90 |  440.28 |
+| 91 | 161 | 4 | 18 | 64 |  745.91 |
+| 61 | 116 | 4 |  6 | 78 |  640.93 |
+| 46 | 101 | 9 |  5 | 67 |  611.53 |
+| 93 | 178 | 1 | 46 | 83 |  700.21 |
+| 40 | 133 | 7 | 32 | 77 |  587.89 |
+| 79 | 111 | 0 | 43 | 88 |  483.05 |
+| 16 | 167 | 1 | 27 | 94 |  622.96 |
+| 98 | 198 | 6 | 37 | 72 |  848.59 |
+| 84 | 181 | 9 | 15 | 72 |  902.42 |
+| 60 | 170 | 3 | 45 | 67 |  596.53 |
+| 35 | 115 | 9 |  5 | 63 |  619.36 |
+| 55 | 132 | 9 | 33 | 69 |  616.03 |
+| 32 | 101 | 4 |  3 | 59 |  492.30 |
+| 95 | 136 | 5 |  2 | 76 |  793.31 |
+|  4 | 111 | 8 | 48 | 69 |  376.32 |
+| 18 | 160 | 7 |  7 | 52 |  649.27 |
+| 47 | 174 | 4 |  8 | 75 |  769.88 |
+| 74 | 103 | 7 | 49 | 80 |  506.74 |
+| 53 | 162 | 1 | 23 | 54 |  577.99 |
+| 33 | 124 | 6 | 44 | 82 |  498.38 |
+| 33 | 137 | 1 | 46 | 53 |  367.28 |
+| 83 | 161 | 2 | 43 | 92 |  683.29 |
+| 56 | 142 | 3 | 33 | 53 |  510.48 |
+|  9 | 125 | 4 | 38 | 59 |  378.49 |
+
+The resulting formula contains numerical values quite close from integer.  Probably the model should be rounded:
+: 2*$1 - 99.5 + 3*$2 + 15*$3 - 4*$4 + 3*$5
+
+* Example population employee rate
+
+City vs. country side employment rate in the population is given in the following table. Female employees are marked with 1 in the 'F' column.
+
+Can this rate be predicted?
+
+model = ? +?*urban +?*F
+----------------(v)
+| urban | F |  rate |
+|-------+---+-------|
+|     1 | 1 | 0.390 |
+|     1 | 0 | 0.438 |
+|     1 | 1 | 0.341 |
+|     0 | 0 | 0.457 |
+|     0 | 1 | 0.338 |
+
+We see that:
+- average employment rate is 0.444
+- urban employment is slightly higher: 0.00757
+- female employment is lower than average by 0.092
+
+* Holes
+This problem can be solved
+- by pre-school children in five minutes
+- by data scientists in an hour
+- and by people with higher education…
+
+How long will you need to solve it ?
+
+8809 = 6
+7111 = 0
+2172 = 0
+6666 = 4
+1111 = 0
+3213 = 0
+7662 = 2
+9313 = 1
+0000 = 4
+2222 = 0
+3333 = 0
+5555 = 0
+8193 = 3
+8096 = 5
+1012 = 1
+7777 = 0
+9999 = 4
+7756 = 1
+6855 = 3
+9881 = 5
+5531 = 0
+2581 = ???
+
+Let us put it in the form of an Org table.
+For exmaple, column 'a3' tells how many '3' digits aare there in the observation.
+Note that there is no 'a4' column.
+We want to predict column 'n'.
+
+model = ?*a0 +?*a1 +?*a2 +?*a3 +?*a5 +?*a6 +?*a7 +?*a8 +?*a9
+----------------------------------------------(v)
+| a0 | a1 | a2 | a3 | a5 | a6 | a7 | a8 | a9 | n |
+|----+----+----+----+----+----+----+----+----+---|
+|  1 |  0 |  0 |  0 |  0 |  0 |  0 |  2 |  1 | 6 |
+|  0 |  3 |  0 |  0 |  0 |  0 |  1 |  0 |  0 | 0 |
+|  0 |  1 |  2 |  0 |  0 |  0 |  1 |  0 |  0 | 0 |
+|  0 |  0 |  0 |  0 |  0 |  4 |  0 |  0 |  0 | 4 |
+|  0 |  4 |  0 |  0 |  0 |  0 |  0 |  0 |  0 | 0 |
+|  0 |  1 |  1 |  2 |  0 |  0 |  0 |  0 |  0 | 0 |
+|  0 |  0 |  1 |  0 |  0 |  2 |  1 |  0 |  0 | 2 |
+|  0 |  1 |  0 |  2 |  0 |  0 |  0 |  0 |  1 | 1 |
+|  4 |  0 |  0 |  0 |  0 |  0 |  0 |  0 |  0 | 4 |
+|  0 |  0 |  4 |  0 |  0 |  0 |  0 |  0 |  0 | 0 |
+|  0 |  0 |  0 |  4 |  0 |  0 |  0 |  0 |  0 | 0 |
+|  0 |  0 |  0 |  0 |  4 |  0 |  0 |  0 |  0 | 0 |
+|  0 |  1 |  0 |  1 |  0 |  0 |  0 |  1 |  1 | 3 |
+|  1 |  2 |  1 |  0 |  0 |  0 |  0 |  0 |  0 | 1 |
+|  0 |  0 |  0 |  0 |  0 |  0 |  4 |  0 |  0 | 0 |
+|  0 |  0 |  0 |  0 |  0 |  0 |  0 |  0 |  4 | 4 |
+
+Prediction is perfect. We can round the formula:
+: $1 + $6 + 2.*$8 + $9
+
+- $1 is a0, digit 0, which counts for 1
+- $6 is a6, digit 6, which counts for 1
+- $8 is a8, digit 8, which counts for 2
+- $9 is a9, digit 9, which counts for 1
+
+So, orgtbl-fit discovered that only digits 0, 6, 8, 9 count. Other
+digits can be discarded. Those are digits with "holes"
+So the answer is 2581 = 2, because there a 2 holes.
+
+* Best teacher?
+model = ? +?*theo +?*theo^2 +?*duration +?* duration^2 +?*theo*duration
+-------------------------(v)
+|  theo | duration | quizzresult |
+|-------+----------+-------------|
+| 0.781 |     18.0 |        30.3 |
+| 0.615 |     38.3 |         5.2 |
+| 0.601 |      5.2 |        52.5 |
+| 0.176 |      4.4 |        60.4 |
+| 0.428 |     40.9 |        10.5 |
+| 0.255 |     12.2 |        66.2 |
+| 0.784 |     12.6 |        34.2 |
+| 0.468 |      5.4 |        58.1 |
+| 0.475 |     37.6 |        19.8 |
+| 0.605 |     22.5 |        47.5 |
+| 0.319 |     24.8 |        58.7 |
+| 0.713 |     30.1 |        19.2 |
+| 0.596 |     36.0 |        15.6 |
+| 0.659 |     21.8 |        42.5 |
+| 0.731 |     19.6 |        36.2 |
+| 0.309 |     44.0 |         4.9 |
