@@ -1,5 +1,6 @@
 * GPL-3 Licence
 #+TITLE: Unit Tests & Examples for Orgtbl Fit
+Copyright (C) 2014-2023  Thierry Banel
 
 orgtbl-fit is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
