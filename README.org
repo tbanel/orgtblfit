@@ -512,7 +512,7 @@ Let us adjust manually ~$1~ to ~date($1)~:
 Better.
 
 * Installation
-The easiest is to install it from Melpa:
+Coming soon: installation from Melpa. The process will be as follow:
 
 : M-x customize-variable package-archives
 
