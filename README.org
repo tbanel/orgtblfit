@@ -12,6 +12,7 @@ We have a table of observed data. Buses with passengers consume fuel
 (around 30 liters / 100km) given in the 3rd column. We also have the
 year of the travel, and the number of passengers.
 
+#+begin_example
 | year | passengers | consumption |
 |------+------------+-------------|
 | 2012 |         33 |        33.2 |
@@ -29,6 +30,7 @@ year of the travel, and the number of passengers.
 | 2014 |         24 |        32.4 |
 | 2020 |         31 |        30.5 |
 | 2012 |         19 |        33.0 |
+#+end_example
 
 Can we predict the ~consumption~ using ~year~ and ~passengers~ data? Let us
 try with a simple linear-with-constant model.
@@ -40,6 +42,7 @@ Two additional columns appear:
 - the predicted values by the linear-with-constant model,
 - the differences between observations and predictions.
 
+#+begin_example
 | year | passengers | consumption |  Best Fit |  Fit Diff |
 |------+------------+-------------+-----------+-----------|
 | 2012 |         33 |        33.2 | 33.160273 | -0.039727 |
@@ -57,7 +60,8 @@ Two additional columns appear:
 | 2014 |         24 |        32.4 | 32.418060 |   0.01806 |
 | 2020 |         31 |        30.5 | 30.462855 | -0.037145 |
 | 2012 |         19 |        33.0 | 33.048506 |  0.048506 |
-#+TBLFM: $4=707.281913694 - 0.335181456447*$1 + 7.98331706947e-3*$2::$5=$4-$3
+,#+TBLFM: $4=707.281913694 - 0.335181456447*$1 + 7.98331706947e-3*$2::$5=$4-$3
+#+end_example
 
 We see that the predictions are quite close to the observations.
 
@@ -128,6 +132,7 @@ relationship between ~year~ and ~passengers~.
 
 Let us try it:
 
+#+begin_example
 | year | passengers | consumption |  Best Fit |  Fit Diff |
 |------+------------+-------------+-----------+-----------|
 | 2012 |         33 |        33.2 | 33.211648 |  0.011648 |
@@ -145,7 +150,8 @@ Let us try it:
 | 2014 |         24 |        32.4 | 32.410673 |  0.010673 |
 | 2020 |         31 |        30.5 | 30.398903 | -0.101097 |
 | 2012 |         19 |        33.0 | 32.965649 | -0.034351 |
-#+TBLFM: $4=501.454507662 - 0.233013277919*$1 + 2.837561942e-3*$2 - 3.68345292814e-3*$2*($1 - 2016)::$5=$4-$3
+,#+TBLFM: $4=501.454507662 - 0.233013277919*$1 + 2.837561942e-3*$2 - 3.68345292814e-3*$2*($1 - 2016)::$5=$4-$3
+#+end_example
 
 The fit is slightly better. After all there might be a cross
 relationship between ~years~ and ~passengers~. The coefficient is
@@ -181,6 +187,7 @@ it is easy: just add new rows to the table.
 
 Example. Coming back to the buses example, we add 3 rows to the table.
 
+#+begin_example
 | year | passengers | consumption |  Best Fit |  Fit Diff |
 |------+------------+-------------+-----------+-----------|
 | 2012 |         33 |        33.2 | 33.160273 | -0.039727 |
@@ -192,7 +199,8 @@ Example. Coming back to the buses example, we add 3 rows to the table.
 | 2017 |         10 |             | 31.300749 | 31.300749 |
 | 2020 |          5 |             | 30.255288 | 30.255288 |
 | 2023 |         31 |             | 29.457310 |  29.45731 |
-#+TBLFM: $4=707.281913694 - 0.335181456447*$1 + 7.98331706947e-3*$2::$5=$4-$3
+,#+TBLFM: $4=707.281913694 - 0.335181456447*$1 + 7.98331706947e-3*$2::$5=$4-$3
+#+end_example
 
 We ask Org to recompute the table by typing ~C-u C-c *~. And we get our
 3 predictions. Only the ~Best Fit~ column is worth looking at.
@@ -202,7 +210,8 @@ range of observations. There is no problem as far as the model is
 concerned. However we should be careful, as reality may invalidate our
 predictions with unforeseen events.
 
-"Prediction is a difficult art, especially when it concerns the future".
+/"Prediction is a difficult art, especially when it concerns the future"/.
+
   Grucho Max? Mark Twain? Pierre Dac? Niels Bohr?
 
 * How it works?
@@ -232,6 +241,7 @@ Let us store data in an Org Mode table, one row per observation. Each
 row counts the number of fruits in a basket, plus the overall weight
 including the basket itself (in grams).
 
+#+begin_example
 | apples | bananas | blueberries | total weight |
 |--------+---------+-------------+--------------|
 |      6 |       5 |          50 |         2816 |
@@ -249,11 +259,13 @@ including the basket itself (in grams).
 |      3 |       2 |         227 |         1943 |
 |      7 |       5 |          95 |         3131 |
 |      1 |       4 |          59 |         1559 |
+#+end_example
 
 Let us put the cursor on the ~total weight~ column, and type ~M-x
 orgtbl-fit~. The default linear-plus-constant model is the one
 to use. Result is:
 
+#+begin_example
 | apples | bananas | blueberries | total weight |  Best Fit | Fit Diff |
 |--------+---------+-------------+--------------+-----------+----------|
 |      6 |       5 |          50 |         2816 | 2820.3575 |   4.3575 |
@@ -271,11 +283,13 @@ to use. Result is:
 |      3 |       2 |         227 |         1943 | 1940.7040 |   -2.296 |
 |      7 |       5 |          95 |         3131 | 3127.0847 |  -3.9153 |
 |      1 |       4 |          59 |         1559 | 1558.0155 |  -0.9845 |
-#+TBLFM: $5=452.653490802 + 217.494062646*$1 + 192.718341278*$2 + 1.9829588217*$3::$6=$5-$4
+,#+TBLFM: $5=452.653490802 + 217.494062646*$1 + 192.718341278*$2 + 1.9829588217*$3::$6=$5-$4
+#+end_example
 
 Let us enhance readability by limiting display to 1 digit after
 dot. The regular Org table ~%.1f~ format is handy:
 
+#+begin_example
 | apples | bananas | blueberries | total weight | Best Fit | Fit Diff |
 |--------+---------+-------------+--------------+----------+----------|
 |      6 |       5 |          50 |         2816 |   2820.4 |      4.4 |
@@ -293,7 +307,8 @@ dot. The regular Org table ~%.1f~ format is handy:
 |      3 |       2 |         227 |         1943 |   1940.7 |     -2.3 |
 |      7 |       5 |          95 |         3131 |   3127.1 |     -3.9 |
 |      1 |       4 |          59 |         1559 |   1558.0 |     -1.0 |
-#+TBLFM: $5=452.653490802 + 217.494062646*$1 + 192.718341278*$2 + 1.9829588217*$3; %.1f::$6=$5-$4; %.1f
+,#+TBLFM: $5=452.653490802 + 217.494062646*$1 + 192.718341278*$2 + 1.9829588217*$3; %.1f::$6=$5-$4; %.1f
+#+end_example
 
 We see that the predicted values are quite close to the actual
 ones. Good!
@@ -326,7 +341,6 @@ factors:
   theory is as bad as 100% practice. The best is somewhere in between,
   but you don't know where.
   : theo ∈ [0..1]
-
 - ~duration~: theoretical lectures alternate with practical exercices,
   at this rate. Periods of 3 minutes are too short, and periods of 3
   hours are too long. The best duration is in between.
@@ -359,6 +373,7 @@ find.
 Now, you decide to experiment with different settings every week. You
 accumulate samples, one per week. Here they are:
 
+#+begin_example
 |  theo | duration | quizzresult |
 |-------+----------+-------------|
 | 0.781 |     18.0 |        30.3 |
@@ -377,6 +392,7 @@ accumulate samples, one per week. Here they are:
 | 0.659 |     21.8 |        42.5 |
 | 0.731 |     19.6 |        36.2 |
 | 0.309 |     44.0 |         4.9 |
+#+end_example
 
 You want to know what are the optimal ~theo~ & ~duration~, with just
 observations over 16 weeks.
@@ -386,6 +402,7 @@ the cursor on the ~quizzresult~ column and you type ~M-x
 orgtbl-fit~. You enter your double quadratic model. And you
 format result to 1 digit after dot with ~;%.1f~ for readability:
 
+#+begin_example
 |  theo | duration | quizzresult | Best Fit | Fit Diff |
 |-------+----------+-------------+----------+----------|
 | 0.781 |     18.0 |        30.3 |     31.4 |      1.1 |
@@ -404,7 +421,8 @@ format result to 1 digit after dot with ~;%.1f~ for readability:
 | 0.659 |     21.8 |        42.5 |     41.8 |     -0.7 |
 | 0.731 |     19.6 |        36.2 |     36.3 |      0.1 |
 | 0.309 |     44.0 |         4.9 |      4.3 |     -0.6 |
-#+TBLFM: $4=41.310831661 + 86.6227413961*$1 - 134.496123584*$1^2 + 2.04949509715*$2 - 0.067672358144*$2^2 - 0.744700713305*$2*$1 ;%.1f::$5=$4-$3 ;%.1f
+,#+TBLFM: $4=41.310831661 + 86.6227413961*$1 - 134.496123584*$1^2 + 2.04949509715*$2 - 0.067672358144*$2^2 - 0.744700713305*$2*$1 ;%.1f::$5=$4-$3 ;%.1f
+#+end_example
 
 The fit is quite good. Your optimal model instanciation is therefore:
 
@@ -428,12 +446,12 @@ zero.
 Now solve this simple 2 equations, 2 variables system. Calc can do that.
 - ~M-x calc~ to lauch Calc
 - ~[~ to open a vector
-- ~' 2.049-.136*duration-.7447*theo~  enter the first equation
-- ~' -269.00*theo+86.62-.7447*duration~ enter the second
+- ~'~ ~2.049-.136*duration-.7447*theo~  enter the first equation
+- ~'~ ~-269.00*theo+86.62-.7447*duration~ enter the second
 - ~]~  close the vector
 - ~a S duration theo~ to solve the system
 
-Calc answer:
+Calc answers:
 #+begin_example
 [duration = 13.5077128691, theo = 0.284612662552]
 #+end_example
@@ -445,12 +463,14 @@ You can inject those values into the table. Just put the cursor in
 the last row and the first column. Then type ~Ret~ and fill in the
 cells. Compute this new row typing ~C-c *~:
 
+#+begin_example
 |  theo | duration | quizzresult | Best Fit | Fit Diff |
 |-------+----------+-------------+----------+----------|
 |   ...
 | 0.309 |     44.0 |         4.9 |      4.3 |     -0.6 |
 | .2846 |     13.5 |             |     67.5 |     67.5 |
-#+TBLFM: $4=41.310831661 + 86.6227413961*$1 - 134.496123584*$1^2 + 2.04949509715*$2 - 0.067672358144*$2^2 - 0.744700713305*$2*$1 ;%.1f::$5=$4-$3 ;%.1f
+,#+TBLFM: $4=41.310831661 + 86.6227413961*$1 - 134.496123584*$1^2 + 2.04949509715*$2 - 0.067672358144*$2^2 - 0.744700713305*$2*$1 ;%.1f::$5=$4-$3 ;%.1f
+#+end_example
 
 The best possible result to the quiz is therefore 67.5%.
 
@@ -467,16 +487,20 @@ ajusted manually. The ~date()~ function is handy. It can convert a date
 to a number of days and back again. As an example, we want to explain
 the ~num~ column by the ~event~ column. ~orgtbl-fit~ gives:
 
+#+begin_example
 | event            | num | Best Fit                                 | Fit Diff                                 |
 |------------------+-----+------------------------------------------+------------------------------------------|
 | [2023-01-08 Sun] | 1.1 | 0.037186948*[2023-01-08 Sun] - 27462.367 | 0.037186948*[2023-01-08 Sun] - 27463.467 |
 | [2023-02-08 Wed] | 2.6 | 0.037186948*[2023-02-08 Wed] - 27462.367 | 0.037186948*[2023-02-08 Wed] - 27464.967 |
 | [2023-03-03 Fri] | 3.2 | 0.037186948*[2023-03-03 Fri] - 27462.367 | 0.037186948*[2023-03-03 Fri] - 27465.567 |
 | [2023-05-17 Wed] | 6.0 | 0.037186948*[2023-05-17 Wed] - 27462.367 | 0.037186948*[2023-05-17 Wed] - 27468.367 |
-#+TBLFM: $3=0.0371869477971*$1 - 27462.3666844::$4=$3-$2
+,#+TBLFM: $3=0.0371869477971*$1 - 27462.3666844::$4=$3-$2
+#+end_example
 
 Let us adjust manually ~$1~ to ~date($1)~:
 
+#+begin_example
+#+end_example
 | event            | num |  Best Fit |   Fit Diff |
 |------------------+-----+-----------+------------|
 | [2023-01-08 Sun] | 1.1 | 1.2354983 |  0.1354983 |
@@ -528,12 +552,12 @@ author for other Org table tools.
 * License
 Copyright (C) 2014-2023  Thierry Banel
 
-orgtbl-aggregate is free software: you can redistribute it and/or modify
+orgtbl-fit is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-orgtbl-aggregate is distributed in the hope that it will be useful,
+orgtbl-fit is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
