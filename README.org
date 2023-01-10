@@ -531,7 +531,7 @@ use ~use-package~ in your ~.emacs~ init file:
 (use-package orgtbl-fit
   :after (org)
   :bind ("C-c f" . orgtbl-fit)
-  :config
+  :init
   (easy-menu-add-item
    org-tbl-menu '("Column")
    ["Regression fit this column" orgtbl-fit (org-at-table-p)]))
