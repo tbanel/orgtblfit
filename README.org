@@ -512,16 +512,25 @@ Let us adjust manually ~$1~ to ~date($1)~:
 Better.
 
 * Installation
-Coming soon: installation from Melpa. The process will be as follow:
+The easiest and most standard installation is from Melpa. The process is as follow:
+
+Tell Emacs about the Melpa repository, if you have not already:
 
 : M-x customize-variable package-archives
 
 Add the Melpa URL: http://melpa.org/packages/
 
+Install ~orgtbl-fit~:
+
 : M-x package-install orgtbl-fit
 
 The package will be auto-loaded when you call ~orgtbl-fit~ (otherwise it
 will stay out of the way).
+
+Alternately, you may download the ~orgtbl-fit.el~ file, and load it in
+your ~.emacs~ configuration file:
+
+: (load-file "somewhere/in/you/computer/orgtbl-fit.el")
 
 You may want to add an entry in the ~Table~ menu, ~Column~ sub-menu. You
 may also want to call ~orgtbl-fit~ with ~C-c f~. One way to do so is to
