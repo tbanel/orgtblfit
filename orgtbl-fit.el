@@ -1,6 +1,6 @@
 ;;; orgtbl-fit.el --- Regression-fit a column in an Org Mode table  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014-2023  Thierry Banel
+;; Copyright (C) 2014-2024  Thierry Banel
 
 ;; Author: Thierry Banel tbanelwebmin at free dot fr
 ;; Contributors:

@@ -546,7 +546,7 @@ Look also at ~orgtbl-aggregate~ and ~orgtbl-join~ packages from the same
 author for other Org table tools.
 
 * License
-Copyright (C) 2014-2023  Thierry Banel
+Copyright (C) 2014-2024  Thierry Banel
 
 orgtbl-fit is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
