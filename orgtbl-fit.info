@@ -593,8 +593,10 @@ File: orgtbl-fit.info,  Node: Authors contributors,  Next: GPL 3 License,  Prev:
 Author
    • Thierry Banel, tbanelwebmin at free dot fr
 
-   Look also at ‘orgtbl-aggregate’ and ‘orgtbl-join’ packages from the
-same author for other Org table tools.
+   Look also at packages from the same author:
+   • ‘orgtbl-aggregate’
+   • ‘orgtbl-join’
+   • ‘uniline’
 
 
 File: orgtbl-fit.info,  Node: GPL 3 License,  Prev: Authors contributors,  Up: Top
@@ -631,7 +633,7 @@ Node: The best teacher?16152
 Node: Dates22101
 Node: Installation23900
 Node: Authors contributors25082
-Node: GPL 3 License25417
+Node: GPL 3 License25422
 
 End Tag Table
 

@@ -6,7 +6,30 @@ Regression fitting predicts numerical values of a column based on
 other columns. The closer the predicted values to the observed values,
 the better the fit is.
 
+* Table of Contents
+:PROPERTIES:
+:TOC:      :include siblings :depth 1 :force () :ignore (this) :local (nothing)
+:CUSTOM_ID: table-of-contents
+:END:
+
+:CONTENTS:
+- [[#example][Example]]
+- [[#usage][Usage]]
+- [[#model][Model]]
+- [[#forecasting-new-data][Forecasting new data]]
+- [[#how-it-works][How it works?]]
+- [[#fruits-baskets][Fruits baskets]]
+- [[#the-best-teacher][The best teacher?]]
+- [[#dates][Dates]]
+- [[#installation][Installation]]
+- [[#authors-contributors][Authors, contributors]]
+- [[#gpl-3-license][GPL 3 License]]
+:END:
+
 * Example
+:PROPERTIES:
+:CUSTOM_ID: example
+:END:
 
 We have a table of observed data. Buses with passengers consume fuel
 (around 30 liters / 100km) given in the 3rd column. We also have the
@@ -88,6 +111,9 @@ only. Coming back to the field and understanding it is mandatory in
 data analysis.
 
 * Usage
+:PROPERTIES:
+:CUSTOM_ID: usage
+:END:
 - Put the cursor in the column you want to fit (not necessarily the
   last one).
 - Type ~M-x orgtbl-fit~.
@@ -101,6 +127,9 @@ data analysis.
 - Add rows to the table with new data to compute predictions.
 
 * Model
+:PROPERTIES:
+:CUSTOM_ID: model
+:END:
 ~orgtbl-fit~ needs a model. It is an equation assumed to compute the
 target column. But the parameters are not specified. Instead, question
 marks ~?~ denote placeholders.
@@ -179,6 +208,9 @@ will no longer summarize the data. Use as few coefficients (question
 marks ~?~) as possible to fit data, but not less.
 
 * Forecasting new data
+:PROPERTIES:
+:CUSTOM_ID: forecasting-new-data
+:END:
 
 We came up with a quite good predictive model for data
 observations. But could it be applied to new data? Answer is Yes! And
@@ -214,6 +246,9 @@ predictions with unforeseen events.
   Grucho Max? Mark Twain? Pierre Dac? Niels Bohr?
 
 * How it works?
+:PROPERTIES:
+:CUSTOM_ID: how-it-works
+:END:
 A classical regression fitting is performed. The process attempts to
 change the placeholders (question marks ~?~) in the model equation by
 actual numerical values. Those numerical values are choosen so that
@@ -232,6 +267,9 @@ want a pure Emacs system without external dependencies, and
 integration with Org Tables.
 
 * Fruits baskets
+:PROPERTIES:
+:CUSTOM_ID: fruits-baskets
+:END:
 We need to estimate the average weight of an apple, a banana, and a
 blueberry. But we don't have any device to weight fruits. We can just
 read a label on each basket giving its overall weight. All baskets are
@@ -326,6 +364,9 @@ The formula is easy to interprete:
 - A single blueberry weigths 1.98 g.
 
 * The best teacher?
+:PROPERTIES:
+:CUSTOM_ID: the-best-teacher
+:END:
 You are a teacher who gives a 3 days course every week. The course is
 always the same, but you give it to new students each time.
 
@@ -479,6 +520,9 @@ numbers, of course. Teaching is much more than this simplistic
 regression fitting example.
 
 * Dates
+:PROPERTIES:
+:CUSTOM_ID: dates
+:END:
 Dates in tables are converted to a number of days since January 1st
 year 1. Therefore columns of dates can be used as numeric columns.
 
@@ -512,6 +556,9 @@ Let us adjust manually ~$1~ to ~date($1)~:
 Better.
 
 * Installation
+:PROPERTIES:
+:CUSTOM_ID: installation
+:END:
 The easiest and most standard installation is from Melpa. The process is as follow:
 
 Tell Emacs about the Melpa repository, if you have not already:
@@ -547,14 +594,22 @@ use ~use-package~ in your ~.emacs~ init file:
 #+end_src
 
 * Authors, contributors
+:PROPERTIES:
+:CUSTOM_ID: authors-contributors
+:END:
 
 Author
 - Thierry Banel, tbanelwebmin at free dot fr
 
-Look also at ~orgtbl-aggregate~ and ~orgtbl-join~ packages from the same
-author for other Org table tools.
+Look also at packages from the same author:
+- ~orgtbl-aggregate~
+- ~orgtbl-join~
+- ~uniline~
 
 * GPL 3 License
+:PROPERTIES:
+:CUSTOM_ID: gpl-3-license
+:END:
 Copyright (C) 2021-2025  Thierry Banel
 
 orgtbl-fit is free software: you can redistribute it and/or modify
